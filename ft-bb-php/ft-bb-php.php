@@ -167,7 +167,7 @@ FLBuilder::register_module('FTBBPHP', array(
 						// 'type'          => 'ft-bb-php',
 						'type' => 'code',
 						'mode' => 'html',
-						'default'		=> '<?php' . "\n\n" . '?>',
+						'default'		=> '',
 						'label'         => '',
 						'rows'          => '18',
 						'preview'       => array(
