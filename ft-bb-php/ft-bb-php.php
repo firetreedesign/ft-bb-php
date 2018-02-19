@@ -21,6 +21,8 @@ class FTBBPHP extends FLBuilderModule {
 			'name'          => __( 'PHP Code', 'ft-bb-php' ),
 			'description'   => __( 'Add PHP code to the page.', 'ft-bb-php' ),
 			'category'		=> __( 'Advanced Modules', 'ft-bb-php' ),
+			'group'			=> __( 'FireTree Design', 'ft-bb-php' ),
+			'icon'			=> 'editor-code.svg',
 			'dir'           => FT_BB_PHP_DIR . 'ft-bb-php/',
 			'url'           => FT_BB_PHP_URL . 'ft-bb-php/',
 		) );
@@ -48,9 +50,9 @@ class FTBBPHP extends FLBuilderModule {
 	 *
 	 * @return void
 	 */
-	public function ft_save_file() {
+	public function ft_save_file( $code ) {
 
-		file_put_contents( $this->ft_get_file_path() , "<?php\nif ( ! defined( 'ABSPATH' ) ) {\n	exit;\n}\n?>\n\n" . $this->settings->code );
+		file_put_contents( $this->ft_get_file_path() , "<?php\nif ( ! defined( 'ABSPATH' ) ) {\n	exit;\n}\n?>\n\n<?php\n" . $code );
 
 	}
 
@@ -87,7 +89,12 @@ class FTBBPHP extends FLBuilderModule {
 			return $settings;
 		}
 
-		$this->ft_save_file();
+		// Check for code errors.
+		$code = $settings->code;
+		// if ( false === $this->ft_validate_code( $code ) ) {
+		// 	$this->ft_save_file( $code );
+		// }
+		$this->ft_save_file( $code );
 
 		return $settings;
 	}
@@ -112,6 +119,38 @@ class FTBBPHP extends FLBuilderModule {
 
 	}
 
+	/**
+	 * Validates the code before saving the file.
+	 */
+	public function ft_validate_code( $code ) {
+		ob_start( array( $this, 'ft_code_error_callback' ) );
+		try {
+			eval( $code );
+			$result = ob_get_clean();
+			return false === $result ? false : $result;
+		} catch (Throwable $t) {
+			ob_flush();
+			return $t;
+		} catch (Exception $e) {
+			ob_flush();
+			return $e;
+		}
+	}
+
+	public function ft_code_error_callback( $out ) {
+		$error = error_get_last();
+
+		if ( is_null( $error ) ) {
+			return $out;
+		}
+
+		$m = '<h3>' . __( "We've Found An Error", 'ft-bb-php' ) . '</h3>';
+		$m .= '<p>' . sprintf( __( 'The PHP code you are trying to run produced a fatal error on line %d:', 'ft-bb-php' ), $error['line'] ) . '</p>';
+		$m .= '<strong>' . $error['message'] . '</strong>';
+		
+		return $m;
+	}
+
 }
 
 /**
@@ -125,7 +164,9 @@ FLBuilder::register_module('FTBBPHP', array(
 				'title'         => '',
 				'fields'        => array(
 					'code'          => array(
-						'type'          => 'ft-bb-php',
+						// 'type'          => 'ft-bb-php',
+						'type' => 'code',
+						'mode' => 'html',
 						'default'		=> '<?php' . "\n\n" . '?>',
 						'label'         => '',
 						'rows'          => '18',
