@@ -3,9 +3,10 @@
  * Plugin Name: PHP Module for Beaver Builder
  * Plugin URI: https://firetreedesign.com/
  * Description: Add PHP code directly to a page using Beaver Builder
- * Version: 1.0
+ * Version: 1.0.1
  * Author: FireTree Design, LLC
  * Author URI: http://firetreedesign.com
+ * GitHub Plugin URI: https://github.com/danielmilner/ft-bb-php
  *
  * @package FT_BB_PHP
  */
