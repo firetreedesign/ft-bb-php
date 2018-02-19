@@ -50,9 +50,9 @@ class FTBBPHP extends FLBuilderModule {
 	 *
 	 * @return void
 	 */
-	public function ft_save_file( $code ) {
+	public function ft_save_file() {
 
-		file_put_contents( $this->ft_get_file_path() , "<?php\nif ( ! defined( 'ABSPATH' ) ) {\n	exit;\n}\n?>\n\n<?php\n" . $code );
+		file_put_contents( $this->ft_get_file_path() , "<?php\nif ( ! defined( 'ABSPATH' ) ) {\n	exit;\n}\n?>\n\n<?php\n" . $settings->code );
 
 	}
 
@@ -89,12 +89,7 @@ class FTBBPHP extends FLBuilderModule {
 			return $settings;
 		}
 
-		// Check for code errors.
-		$code = $settings->code;
-		// if ( false === $this->ft_validate_code( $code ) ) {
-		// 	$this->ft_save_file( $code );
-		// }
-		$this->ft_save_file( $code );
+		$this->ft_save_file();
 
 		return $settings;
 	}
@@ -117,38 +112,6 @@ class FTBBPHP extends FLBuilderModule {
 
 		unlink( $file_path );
 
-	}
-
-	/**
-	 * Validates the code before saving the file.
-	 */
-	public function ft_validate_code( $code ) {
-		ob_start( array( $this, 'ft_code_error_callback' ) );
-		try {
-			eval( $code );
-			$result = ob_get_clean();
-			return false === $result ? false : $result;
-		} catch (Throwable $t) {
-			ob_flush();
-			return $t;
-		} catch (Exception $e) {
-			ob_flush();
-			return $e;
-		}
-	}
-
-	public function ft_code_error_callback( $out ) {
-		$error = error_get_last();
-
-		if ( is_null( $error ) ) {
-			return $out;
-		}
-
-		$m = '<h3>' . __( "We've Found An Error", 'ft-bb-php' ) . '</h3>';
-		$m .= '<p>' . sprintf( __( 'The PHP code you are trying to run produced a fatal error on line %d:', 'ft-bb-php' ), $error['line'] ) . '</p>';
-		$m .= '<strong>' . $error['message'] . '</strong>';
-		
-		return $m;
 	}
 
 }
