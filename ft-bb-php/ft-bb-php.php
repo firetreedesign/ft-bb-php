@@ -52,7 +52,11 @@ class FTBBPHP extends FLBuilderModule {
 	 */
 	public function ft_save_file() {
 
-		file_put_contents( $this->ft_get_file_path() , "<?php\nif ( ! defined( 'ABSPATH' ) ) {\n	exit;\n}\n?>\n\n<?php\n" . $settings->code );
+		if ( 0 === strlen( $this->node ) ) {
+			return;
+		}
+
+		file_put_contents( $this->ft_get_file_path() , "<?php\nif ( ! defined( 'ABSPATH' ) ) {\n	exit;\n}\n?>\n\n<?php\n" . $this->settings->code );
 
 	}
 
@@ -66,7 +70,7 @@ class FTBBPHP extends FLBuilderModule {
 	public function ft_get_file_path() {
 
 		$upload_dir = wp_upload_dir();
-		return $upload_dir['basedir'] . '/bb-plugin/cache/' . (string) get_the_ID() . '-code-' . $this->settings->file_id . '.php';
+		return $upload_dir['basedir'] . '/bb-plugin/cache/' . $this->node . '-code.php';
 
 	}
 
@@ -80,10 +84,6 @@ class FTBBPHP extends FLBuilderModule {
 	 * @return array           Settings from the module.
 	 */
 	public function update( $settings ) {
-
-		if ( empty( $settings->file_id ) ) {
-			$settings->file_id = (string) uniqid();
-		}
 
 		if ( empty( $settings->code ) ) {
 			return $settings;
@@ -103,12 +103,12 @@ class FTBBPHP extends FLBuilderModule {
 	 */
 	public function remove() {
 
-		if ( empty( $this->settings->file_id ) ) {
+		if ( 0 === strlen( $this->node ) ) {
 			return;
 		}
 
 		$upload_dir = wp_upload_dir();
-		$file_path = $upload_dir['basedir'] . '/bb-plugin/cache/' . $this->settings->file_id . '-code.php';
+		$file_path = $upload_dir['basedir'] . '/bb-plugin/cache/' . $this->node . '-code.php';
 
 		unlink( $file_path );
 
